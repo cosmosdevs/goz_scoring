@@ -42,6 +42,7 @@ impl Runnable for StartCmd {
 
                 match serde_json::from_str(&line) {
                     Ok(envelope) => {
+                        status_ok!("Running","processing envelope");
                         APPLICATION.write().score_envelope(envelope);
                     }
                     Err(e) => status_err!("Could not parse json {}", e),
