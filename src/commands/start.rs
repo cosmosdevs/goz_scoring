@@ -46,6 +46,9 @@ impl Runnable for StartCmd {
 
                        let mut state =app_writer();
 
+                       status_ok!("Running","Got Lock");
+
+
                        state.score_envelope(envelope);
                     }
                     Err(e) => status_err!("Could not parse json {}", e),
