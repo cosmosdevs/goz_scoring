@@ -44,7 +44,7 @@ impl Runnable for StartCmd {
                     Ok(envelope) => {
                         status_ok!("Running","processing envelope");
 
-                       let mut state = APPLICATION.write();
+                       let mut state =app_writer();
 
                        state.score_envelope(envelope);
                     }
