@@ -12,6 +12,7 @@ use std::collections::BTreeSet;
 use std::collections::HashMap;
 use subtle_encoding::bech32::{decode, encode};
 use std::fmt;
+use crate::prelude::*;
 
 
 /// Application state
@@ -105,6 +106,7 @@ impl GozScoringApp {
 
     pub fn score_envelope(&mut self, envelope: Envelope) {
         for message in envelope.msg {
+            status_ok!("Running", "Processing Message");
             match message {
                 sagan::message::Message::EventIBC(ref event) => {
                     match event {
