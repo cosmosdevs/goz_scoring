@@ -120,7 +120,7 @@ impl GozScoringApp {
                                         self.observed_transactions.insert(hash.clone());
 
                                         if let Some(senders) =
-                                            inner_event.data.get("message.senders")
+                                            inner_event.data.get("message.sender")
                                         {
                                             // Get the second to last sender to use to assign a packet to a team
                                             if let Some(sender_address) =
