@@ -4,10 +4,10 @@ use crate::application::APPLICATION;
 /// App-local prelude includes `app_reader()`/`app_writer()`/`app_config()`
 /// accessors along with logging macros. Customize as you see fit.
 use crate::prelude::*;
+use std::fmt;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::{self, BufReader};
-use std::fmt;
 
 use sagan::message::Envelope;
 
@@ -42,20 +42,19 @@ impl Runnable for StartCmd {
 
                 match serde_json::from_str(&line) {
                     Ok(envelope) => {
-                        status_ok!("Running","processing envelope");
+                        status_ok!("Running", "processing envelope");
 
-                       let mut state =app_writer();
+                        let mut state = app_writer();
 
-                       status_ok!("Running","Got Lock");
+                        status_ok!("Running", "Got Lock");
 
-
-                       state.score_envelope(envelope);
+                        state.score_envelope(envelope);
                     }
                     Err(e) => status_err!("Could not parse json {}", e),
                 }
             }
         }
-       APPLICATION.read().print();
+        APPLICATION.read().print();
     }
 }
 
@@ -67,7 +66,6 @@ impl config::Override<GozScoringConfig> for StartCmd {
         &self,
         mut config: GozScoringConfig,
     ) -> Result<GozScoringConfig, FrameworkError> {
-
         Ok(config)
     }
 }

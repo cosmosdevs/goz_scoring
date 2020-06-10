@@ -1,5 +1,6 @@
 //! GozScoring Abscissa Application
 
+use crate::prelude::*;
 use crate::{commands::GozScoringCmd, config::GozScoringConfig};
 use abscissa_core::{
     application::{self, AppCell},
@@ -10,12 +11,10 @@ use sagan::message::Envelope;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 use std::collections::HashMap;
-use subtle_encoding::bech32::{decode, encode};
 use std::fmt;
-use std::io::Write;
-use crate::prelude::*;
 use std::fs::OpenOptions;
-
+use std::io::Write;
+use subtle_encoding::bech32::{decode, encode};
 
 /// Application state
 pub static APPLICATION: AppCell<GozScoringApp> = AppCell::new();
@@ -79,39 +78,47 @@ pub struct GozScoringApp {
     observed_transactions: BTreeSet<String>,
 }
 
-
 impl fmt::Display for GozScoringApp {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for (team, score) in self.scores.iter() {
+            let total_score = (score.hub_opaque_packets as f64)
+                + (score.packets_from_hub as f64 * 0.5)
+                + (score.opaque_packets_tx as f64 * 0.1);
 
-        for (team, score) in self.scores.iter(){
-            let total_score = (score.hub_opaque_packets as f64) + (score.packets_from_hub as f64 * 0.5) + (score.opaque_packets_tx as f64 *0.1);
-
-            write!(f, "Team:{}, Total Phase 2 Score {}, Total Packets Relayed{})\n", team, total_score, score.opaque_packets_total)?;
+            write!(
+                f,
+                "Team:{}, Total Phase 2 Score {}, Total Packets Relayed{})\n",
+                team, total_score, score.opaque_packets_total
+            )?;
         }
 
-   Ok(())
+        Ok(())
     }
-
 }
 
 impl GozScoringApp {
-
-    pub fn print(&self){
+    pub fn print(&self) {
         let mut buf = Vec::new();
-        for (team, score) in self.scores.iter(){
-            let total_score = (score.hub_opaque_packets as f64) + (score.packets_from_hub as f64 * 0.5) + (score.opaque_packets_tx as f64 *0.1);
+        for (team, score) in self.scores.iter() {
+            let total_score = (score.hub_opaque_packets as f64)
+                + (score.packets_from_hub as f64 * 0.5)
+                + (score.opaque_packets_tx as f64 * 0.1);
 
-            write!(&mut buf,"Team:{}, Total Phase 2 Score {}, Total Packets Relayed {})\n", team, total_score, score.opaque_packets_total).unwrap();
+            write!(
+                &mut buf,
+                "Team:{}, Total Phase 2 Score {}, Total Packets Relayed {})\n",
+                team, total_score, score.opaque_packets_total
+            )
+            .unwrap();
         }
-        
-        let mut file = OpenOptions::new().write(true)
-                             .create_new(true)
-                             .open("results.txt").unwrap();
+
+        let mut file = OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open("results.txt")
+            .unwrap();
         file.write_all(&buf);
-
-
     }
-
 
     pub fn score_envelope(&mut self, envelope: Envelope) {
         for message in envelope.msg {
@@ -120,7 +127,6 @@ impl GozScoringApp {
             match message {
                 sagan::message::Message::EventIBC(ref event) => {
                     match event {
-
                         /// Compute all the scoring for an opaque packet
                         IBCEvent::OpaquePacket(ref inner_event) => {
                             status_ok!("Processing oqaque packet", " got event");
@@ -137,33 +143,39 @@ impl GozScoringApp {
                                         {
                                             status_ok!("Processing oqaque packet", "Got Senders");
 
-                                            // Get the second to last sender to use to assign a packet to a team
-                                            if let Some(sender_address) =
-                                                senders.get(senders.len() - 2)
+                                            if let Some(src_channels) = inner_event
+                                                .data
+                                                .get("recv_packet.packet_src_channel")
                                             {
-                                                status_ok!("Processing oqaque packet", "Got Sender");
-
-                                                if let Some(team) =
-                                                    self.get_team_by_address(sender_address)
+                                                // Get the second to last sender to use to assign a packet to a team
+                                                if let Some(sender_address) =
+                                                    senders.get(src_channels.len() + 1)
                                                 {
-                                                    status_ok!("Processing oqaque packet", "Scoring");
+                                                    status_ok!(
+                                                        "Processing oqaque packet",
+                                                        "Got Sender"
+                                                    );
 
-                                                    let score = self
-                                                        .scores
-                                                        .entry(team.clone())
-                                                        .or_insert(Score::default());
+                                                    if let Some(team) =
+                                                        self.get_team_by_address(sender_address)
+                                                    {
+                                                        status_ok!(
+                                                            "Processing oqaque packet",
+                                                            "Scoring"
+                                                        );
 
-                                                    if let Some(config) = &self.config {
-                                                        if let Some(src_channels) = inner_event
-                                                            .data
-                                                            .get("recv_packet.packet_src_channel")
-                                                        {
+                                                        let score = self
+                                                            .scores
+                                                            .entry(team.clone())
+                                                            .or_insert(Score::default());
+
+                                                        if let Some(config) = &self.config {
                                                             if let Some(channel) =
                                                                 src_channels.get(0)
                                                             {
-                                                                if config.hub_id.contains(&envelope.network.to_string())
-                                                                    
-                                                                {
+                                                                if config.hub_id.contains(
+                                                                    &envelope.network.to_string(),
+                                                                ) {
                                                                     score.hub_opaque_packets += 1;
                                                                 } else if self
                                                                     .source_channels
@@ -175,7 +187,8 @@ impl GozScoringApp {
                                                                 }
 
                                                                 // Use src channels as proxy for the number of packets in a multimessage
-                                                                score.opaque_packets_total += src_channels.len() as u64;
+                                                                score.opaque_packets_total +=
+                                                                    src_channels.len() as u64;
                                                             }
                                                         }
                                                     }
@@ -185,21 +198,23 @@ impl GozScoringApp {
                                     }
                                 }
                             }
-                        },
-                        IBCEvent::PacketTransfer(ref inner_event) =>{
+                        }
+                        IBCEvent::PacketTransfer(ref inner_event) => {
                             status_ok!("Processing Packet Transfer", " got event");
 
                             if let Some(config) = &self.config {
-                            if config.hub_id.contains(&envelope.network.to_string()) {
-                                if let Some(dst_channels) = inner_event.data.get("send_packet.packet_dst_channel"){
-                                    for dst_channel in dst_channels{
-                                        /// Populate the source channels data
-                                        self.source_channels.insert(dst_channel.clone());
+                                if config.hub_id.contains(&envelope.network.to_string()) {
+                                    if let Some(dst_channels) =
+                                        inner_event.data.get("send_packet.packet_dst_channel")
+                                    {
+                                        for dst_channel in dst_channels {
+                                            /// Populate the source channels data
+                                            self.source_channels.insert(dst_channel.clone());
+                                        }
                                     }
                                 }
                             }
                         }
-                        },
                         _ => {}
                     }
                 }
@@ -282,7 +297,7 @@ impl Application for GozScoringApp {
     fn after_config(&mut self, config: Self::Cfg) -> Result<(), FrameworkError> {
         // Configure components
         self.state.components.after_config(&config)?;
-        status_ok!("Config","Build Hashmaps");
+        status_ok!("Config", "Build Hashmaps");
         self.address_to_team = config.build_hashmaps();
         dbg!(&self.address_to_team);
 
