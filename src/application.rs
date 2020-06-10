@@ -117,7 +117,7 @@ impl GozScoringApp {
             .create_new(true)
             .open("results.txt")
             .unwrap();
-        file.write_all(&buf);
+        file.write_all(&buf).unwrap();
     }
 
     pub fn score_envelope(&mut self, envelope: Envelope) {
