@@ -106,7 +106,7 @@ impl GozScoringApp {
 
     pub fn score_envelope(&mut self, envelope: Envelope) {
         for message in envelope.msg {
-            status_ok!("Running", "Processing Message {:?}", message );
+            // status_ok!("Running", "Processing Message {:?}", message );
 
             match message {
                 sagan::message::Message::EventIBC(ref event) => {
@@ -178,6 +178,8 @@ impl GozScoringApp {
                             }
                         },
                         IBCEvent::PacketTransfer(ref inner_event) =>{
+                            status_ok!("Processing Packet Transfer", " got event");
+
                             if let Some(config) = &self.config {
                             if envelope.network.to_string() == config.hub_id{
                                 if let Some(dst_channels) = inner_event.data.get("send_packet.packet_dst_channel"){
