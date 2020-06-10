@@ -12,6 +12,7 @@ use std::collections::BTreeSet;
 use std::collections::HashMap;
 use subtle_encoding::bech32::{decode, encode};
 use std::fmt;
+use std::io::Write;
 use crate::prelude::*;
 
 
@@ -95,11 +96,16 @@ impl fmt::Display for GozScoringApp {
 impl GozScoringApp {
 
     pub fn print(&self){
+        let mut buf = Vec::new();
         for (team, score) in self.scores.iter(){
             let total_score = (score.hub_opaque_packets as f64) + (score.packets_from_hub as f64 * 0.5) + (score.opaque_packets_tx as f64 *0.1);
 
-            println!("Team:{}, Total Phase 2 Score {}, Total Packets Relayed{})\n", team, total_score, score.opaque_packets_total);
+            write!(&mut buf,"Team:{}, Total Phase 2 Score {}, Total Packets Relayed {})\n", team, total_score, score.opaque_packets_total).unwrap();
         }
+        
+        let mut file =std::fs::File::open("results.txt").unwrap();
+        file.write_all(&buf);
+
 
     }
 

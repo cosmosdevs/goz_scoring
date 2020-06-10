@@ -32,6 +32,7 @@ pub struct StartCmd {
 impl Runnable for StartCmd {
     /// Start the application.
     fn run(&self) {
+        app_config();
 
         for scoreable in self.event_jsons.as_slice() {
             let f = File::open(scoreable).expect(&format!("Could not open file {:?}", scoreable));
@@ -58,18 +59,15 @@ impl Runnable for StartCmd {
     }
 }
 
-// impl config::Override<GozScoringConfig> for StartCmd {
-//     // Process the given command line options, overriding settings from
-//     // a configuration file using explicit flags taken from command-line
-//     // arguments.
-//     fn override_config(
-//         &self,
-//         mut config: GozScoringConfig,
-//     ) -> Result<GozScoringConfig, FrameworkError> {
-//         if !self.recipient.is_empty() {
-//             config.hello.recipient = self.recipient.join(" ");
-//         }
+impl config::Override<GozScoringConfig> for StartCmd {
+    // Process the given command line options, overriding settings from
+    // a configuration file using explicit flags taken from command-line
+    // arguments.
+    fn override_config(
+        &self,
+        mut config: GozScoringConfig,
+    ) -> Result<GozScoringConfig, FrameworkError> {
 
-//         Ok(config)
-//     }
-// }
+        Ok(config)
+    }
+}
