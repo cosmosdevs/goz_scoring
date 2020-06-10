@@ -106,7 +106,8 @@ impl GozScoringApp {
 
     pub fn score_envelope(&mut self, envelope: Envelope) {
         for message in envelope.msg {
-            status_ok!("Running", "Processing Message");
+            status_ok!("Running", "Processing Message {:?}", message );
+
             match message {
                 sagan::message::Message::EventIBC(ref event) => {
                     match event {
