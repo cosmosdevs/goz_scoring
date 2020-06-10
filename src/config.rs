@@ -13,7 +13,7 @@ use std::collections::HashMap;
 #[serde(deny_unknown_fields)]
 pub struct GozScoringConfig {
     /// Chain-id of the Hub
-    pub hub_id: String,
+    pub hub_id: Vec<String>,
     /// An example configuration section
     pub teams: Vec<Team>,
 }
@@ -40,8 +40,8 @@ impl GozScoringConfig {
 impl Default for GozScoringConfig {
     fn default() -> Self {
         Self {
-            hub_id: "".to_owned(),
-            teams: vec![],
+            hub_id: Vec::new(),
+            teams: Vec::new(),
         }
     }
 }

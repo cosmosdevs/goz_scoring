@@ -1,4 +1,4 @@
-hub_id = "gameofzoneshub-2a"
+hub_id = ["gameofzoneshub-2a","gameofzoneshub-3"]
 
 
 [[teams]]

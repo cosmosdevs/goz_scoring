@@ -161,8 +161,8 @@ impl GozScoringApp {
                                                             if let Some(channel) =
                                                                 src_channels.get(0)
                                                             {
-                                                                if envelope.network.to_string()
-                                                                    == config.hub_id
+                                                                if config.hub_id.contains(&envelope.network.to_string())
+                                                                    
                                                                 {
                                                                     score.hub_opaque_packets += 1;
                                                                 } else if self
@@ -190,7 +190,7 @@ impl GozScoringApp {
                             status_ok!("Processing Packet Transfer", " got event");
 
                             if let Some(config) = &self.config {
-                            if envelope.network.to_string() == config.hub_id{
+                            if config.hub_id.contains(&envelope.network.to_string()) {
                                 if let Some(dst_channels) = inner_event.data.get("send_packet.packet_dst_channel"){
                                     for dst_channel in dst_channels{
                                         /// Populate the source channels data
