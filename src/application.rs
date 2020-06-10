@@ -273,6 +273,7 @@ impl Application for GozScoringApp {
     fn after_config(&mut self, config: Self::Cfg) -> Result<(), FrameworkError> {
         // Configure components
         self.state.components.after_config(&config)?;
+        status_ok!("Config","Build Hashmaps");
         self.address_to_team = config.build_hashmaps();
 
         self.config = Some(config);
