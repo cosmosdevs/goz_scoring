@@ -113,22 +113,31 @@ impl GozScoringApp {
 
                         /// Compute all the scoring for an opaque packet
                         IBCEvent::OpaquePacket(ref inner_event) => {
+                            status_ok!("Processing oqaque packet", " got event");
                             if let Some(tx_hashes) = inner_event.data.get("tx.hash") {
                                 if let Some(hash) = tx_hashes.get(0) {
                                     /// Don't double count packets
                                     if !self.observed_transactions.contains(hash) {
+                                        status_ok!("Processing oqaque packet", " Hash Unknown");
+
                                         self.observed_transactions.insert(hash.clone());
 
                                         if let Some(senders) =
                                             inner_event.data.get("message.sender")
                                         {
+                                            status_ok!("Processing oqaque packet", "Got Senders");
+
                                             // Get the second to last sender to use to assign a packet to a team
                                             if let Some(sender_address) =
                                                 senders.get(senders.len() - 2)
                                             {
+                                                status_ok!("Processing oqaque packet", "Got Sender");
+
                                                 if let Some(team) =
                                                     self.get_team_by_address(sender_address)
                                                 {
+                                                    status_ok!("Processing oqaque packet", "Scoring");
+
                                                     let score = self
                                                         .scores
                                                         .entry(team.clone())
