@@ -14,6 +14,7 @@ use subtle_encoding::bech32::{decode, encode};
 use std::fmt;
 use std::io::Write;
 use crate::prelude::*;
+use std::fs::OpenOptions;
 
 
 /// Application state
@@ -103,7 +104,9 @@ impl GozScoringApp {
             write!(&mut buf,"Team:{}, Total Phase 2 Score {}, Total Packets Relayed {})\n", team, total_score, score.opaque_packets_total).unwrap();
         }
         
-        let mut file =std::fs::File::open("results.txt").unwrap();
+        let mut file = OpenOptions::new().write(true)
+                             .create_new(true)
+                             .open("results.txt").unwrap();
         file.write_all(&buf);
 
 
