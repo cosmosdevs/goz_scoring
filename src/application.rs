@@ -275,6 +275,7 @@ impl Application for GozScoringApp {
         self.state.components.after_config(&config)?;
         status_ok!("Config","Build Hashmaps");
         self.address_to_team = config.build_hashmaps();
+        dbg!(&self.address_to_team);
 
         self.config = Some(config);
 
