@@ -152,7 +152,7 @@ impl GozScoringApp {
                                                                 {
                                                                     score.packets_from_hub += 1;
                                                                 } else {
-                                                                    score.opaque_packets_tx + 1;
+                                                                    score.opaque_packets_tx += 1;
                                                                 }
 
                                                                 // Use src channels as proxy for the number of packets in a multimessage
