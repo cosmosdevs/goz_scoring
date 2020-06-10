@@ -32,7 +32,6 @@ pub struct StartCmd {
 impl Runnable for StartCmd {
     /// Start the application.
     fn run(&self) {
-        let config = app_config();
 
         for scoreable in self.event_jsons.as_slice() {
             let f = File::open(scoreable).expect(&format!("Could not open file {:?}", scoreable));
